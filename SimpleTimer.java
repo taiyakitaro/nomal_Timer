@@ -12,6 +12,7 @@ public class SimpleTimer extends JFrame {
     private JButton startButton;
     private JButton stopwatchStartButton;
     private JButton stopwatchStopButton;
+    private JButton resetButton;
     private Timer timer;
     private int remainingSeconds;
     private LocalDateTime stopwatchStartTime;
@@ -19,7 +20,7 @@ public class SimpleTimer extends JFrame {
 
     public SimpleTimer() {
         setTitle("簡易タイマーとストップウォッチ");
-        setSize(400, 200);
+        setSize(400, 250);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
 
@@ -28,7 +29,7 @@ public class SimpleTimer extends JFrame {
         add(new JLabel("タイマー秒数を入力:"));
         add(inputField);
 
-        timerLabel = new JLabel("タイマー残り: 0秒");
+        timerLabel = new JLabel("タイマー残り: 00:00:00");
         add(timerLabel);
 
         startButton = new JButton("タイマー開始");
@@ -47,7 +48,7 @@ public class SimpleTimer extends JFrame {
         });
 
         // ストップウォッチ機能
-        stopwatchLabel = new JLabel("ストップウォッチ: 0秒");
+        stopwatchLabel = new JLabel("ストップウォッチ: 00:00:00");
         add(stopwatchLabel);
 
         stopwatchStartButton = new JButton("ストップウォッチ開始");
@@ -70,6 +71,17 @@ public class SimpleTimer extends JFrame {
                 stopStopwatch();
             }
         });
+
+        // リセットボタン
+        resetButton = new JButton("リセット");
+        add(resetButton);
+
+        resetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                resetAll();
+            }
+        });
     }
 
     private void startTimer() {
@@ -81,7 +93,7 @@ public class SimpleTimer extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (remainingSeconds > 0) {
-                    timerLabel.setText("タイマー残り: " + remainingSeconds + "秒");
+                    timerLabel.setText("タイマー残り: " + formatTime(remainingSeconds));
                     remainingSeconds--;
                 } else {
                     timer.stop();
@@ -102,7 +114,7 @@ public class SimpleTimer extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Duration elapsed = Duration.between(stopwatchStartTime, LocalDateTime.now());
-                stopwatchLabel.setText("ストップウォッチ: " + elapsed.getSeconds() + "秒");
+                stopwatchLabel.setText("ストップウォッチ: " + formatTime((int) elapsed.getSeconds()));
             }
         });
         stopwatchTimer.start();
@@ -114,6 +126,30 @@ public class SimpleTimer extends JFrame {
         }
         stopwatchStartButton.setEnabled(true);
         stopwatchStopButton.setEnabled(false);
+    }
+
+    private void resetAll() {
+        // タイマーのリセット
+        if (timer != null && timer.isRunning()) {
+            timer.stop();
+        }
+        timerLabel.setText("タイマー残り: 00:00:00");
+        inputField.setText("");
+
+        // ストップウォッチのリセット
+        if (stopwatchTimer != null && stopwatchTimer.isRunning()) {
+            stopwatchTimer.stop();
+        }
+        stopwatchLabel.setText("ストップウォッチ: 00:00:00");
+        stopwatchStartButton.setEnabled(true);
+        stopwatchStopButton.setEnabled(false);
+    }
+
+    private String formatTime(int totalSeconds) {
+        int hours = totalSeconds / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
     public static void main(String[] args) {
